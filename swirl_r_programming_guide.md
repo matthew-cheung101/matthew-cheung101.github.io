@@ -755,14 +755,19 @@ summary(plants)
 ```
 `summary()` is class-aware: 
 
-for **numeric** columns it gives min, 1st quartile, median, mean, 3rd quartile, max, and an `NA's` count
+- For **numeric** columns it gives min, 1st quartile, median, mean, 3rd quartile, max, and an `NA's` count
 
-for **categorical** (factor/character) columns it acts like the table() function! It simply counts up how many times each word appears and gives you a tally (e.g., 3,031 Perennials and 682 Annuals), lumping excess categories (it stops at 7, unlike Table, which would never lump excess categories) into an (Other) group. Factors > characters because of custom sorting and a master list of allowed categories, known as Levels. 
+- For **categorical** (factor/character) columns it acts like the table() function! It simply counts up how many times each word appears and gives you a tally (e.g., 3,031 Perennials and 682 Annuals), lumping excess categories (it stops at 7, unlike Table, which would never lump excess categories) into an (Other) group. Factors > characters because of custom sorting and a master list of allowed categories, known as Levels. 
 
-For **character columns** (plain text), it provides structural stats like the number of rows (Length) and character counts (Min.nchar, Max.nchar).
+- For **character columns** (plain text), it provides structural stats like the number of rows (Length) and character counts (Min.nchar, Max.nchar).
 
 ```r
 table(plants$Active_Growth_Period)   # exact counts for one categorical column
+```
+
+
+
+```r
 str(plants)                          # the single most useful function here
 ```
 
@@ -775,18 +780,22 @@ str(plants)                          # the single most useful function here
 ## 13. Simulation
 
 ### `sample()` — the workhorse
+
+`sample(x, size, replace = FALSE, prob = NULL)`
+where x is 	either a vector of 1+ elements from which to choose, or a positive integer
+
 ```r
-sample(1:6, 4, replace = TRUE)    # four rolls of a die (WITH replacement)
-sample(1:20, 10)                  # 10 distinct numbers (WITHOUT replacement, the default)
-sample(LETTERS)                   # random permutation of all 26
+sample(1:6, 4, replace = TRUE)    # four rolls of a die (WITH replacement, meaning it can show up more than once)
+sample(1:20, 10)                  # 10 distinct numbers from 1 to 20 (WITHOUT replacement, the default)
+sample(LETTERS)                   # random permutation of all 26; sample n=26 w/o replacement
 ```
 `LETTERS` is a built-in constant (also `letters`, `month.name`, `pi`).
 
 ### Unequal probabilities
 ```r
 flips <- sample(c(0, 1), 100, replace = TRUE, prob = c(0.3, 0.7))
-sum(flips)     # roughly 70 — a biased coin flipped 100 times
-```
+sum(flips)     # roughly 70 — a biased coin flipped 100 times (adding up all the heads, if heads = 1)
+``` 
 
 ### Random draws from named distributions
 The naming convention is a **prefix + distribution**:
@@ -798,31 +807,36 @@ The naming convention is a **prefix + distribution**:
 | `p` | cumulative **p**robability | `pnorm(1.96)` |
 | `q` | **q**uantile (inverse of `p`) | `qnorm(0.975)` |
 
-| Distribution | Suffix |
-|---|---|
-| Normal | `norm` |
-| Binomial | `binom` |
-| Poisson | `pois` |
-| Uniform | `unif` |
-| Exponential | `exp` |
-| Chi-squared | `chisq` |
-| Gamma | `gamma` |
+| Distribution | Suffix | Notes |
+|---|---|---|
+| Normal | `norm` |  |
+| Binomial | `binom` | A binomial random variable represents the number of 'successes' in a given number of independent 'trials'  |
+| Poisson | `pois` | A poisson random variable counts the number of independent events that happen during a fixed block of time or space |
+| Uniform | `unif` | flat rectangular graph |
+| Exponential | `exp` |  |
+| Chi-squared | `chisq` | the sum of the squared values of independent standard normal random variables |
+| Gamma | `gamma` |  |
 
 ```r
-rbinom(1, size = 100, prob = 0.7)     # ONE number: total successes in 100 trials
+rbinom(1, size = 100, prob = 0.7)     # ONE number: total successes in 100 trials 
 rbinom(100, size = 1, prob = 0.7)     # 100 numbers: the individual trials
+
+# both achieve the same effect as the 2 following commands: 
+# sample(c(0, 1), 100, replace = TRUE, prob = c(0.3, 0.7)) 
+# sum(flips)
+
 ```
 Same underlying process, different granularity — a binomial is a sum of Bernoullis.
 
 ```r
-rnorm(10)                   # standard normal: mean 0, sd 1 (the defaults)
+rnorm(10)                   # 10 numbers from a standard normal: mean 0, sd 1 (the defaults) 
 rnorm(10, 100, 25)          # mean 100, sd 25
-rpois(5, 10)                # 5 Poisson draws with lambda = 10
+rpois(5, 10)                # 5 Poisson draws with lambda = 10 (mean = 10, the average number of times an event happens in a block of time/space)
 ```
 
 ### `replicate()` — repeat an expression many times
 ```r
-my_pois <- replicate(100, rpois(5, 10))   # 5x100 matrix: 100 independent samples of size 5
+my_pois <- replicate(100, rpois(5, 10))   # 5x100 (rxc) matrix: 100 independent samples of size 5
 cm <- colMeans(my_pois)                   # the sample mean of each column
 hist(cm)                                  # approximately normal — the CLT, demonstrated
 ```
@@ -853,24 +867,24 @@ R stores both as numbers under the hood, counting from the **Unix epoch, 1970-01
 
 ### Dates
 ```r
-d1 <- Sys.Date()          # today
+d1 <- Sys.Date()          # today, in YYYY/MM/DD
 class(d1)                 # "Date"
-unclass(d1)               # e.g. 20675 — days since the epoch
+unclass(d1)               # e.g. 20675 — days since the epoch (1970-01-01!)
 
-d2 <- as.Date("1969-01-01")
+d2 <- as.Date("1969-01-01") # What happens about dates before the epoch? 
 unclass(d2)               # -365 — dates before 1970 are negative
 ```
 
 ### Times
 ```r
-t1 <- Sys.time()
-class(t1)                 # "POSIXct" "POSIXt"
-unclass(t1)               # a large number of seconds
+t1 <- Sys.time()          # contains "2026-08-15 11:10:32 PDT", class POSIXct
+class(t1)                 # "POSIXct" "POSIXt" (output)
+unclass(t1)               # 1786817432 — a large number of seconds
 
-t2 <- as.POSIXlt(Sys.time())
-class(t2)                 # "POSIXlt" "POSIXt"
-unclass(t2)               # a LIST of components
-str(unclass(t2))
+t2 <- as.POSIXlt(Sys.time()) # coercion of Sys.time() from class POSIXct to POSIXlt
+class(t2)                 # "POSIXlt" "POSIXt" (output)
+unclass(t2)               # a LIST of components, like all POSIXlt objects
+str(unclass(t2))          # compact view
 t2$min                    # extract just the minute
 ```
 Other `POSIXlt` fields: `sec`, `hour`, `mday`, `mon` (0–11), `year` (years since 1900), `wday` (0 = Sunday), `yday`, `isdst`.
@@ -883,14 +897,16 @@ weekdays(d1)     # "Monday"
 months(t1)       # "August"
 quarters(t2)     # "Q3"
 ```
-These work on any of the three classes.
+These work on any of the three classes (any date or time object).
 
 ### Parsing messy strings with `strptime()`
+Converts character vectors to POSIXlt.
+
 ```r
-t3 <- "October 17, 1986 08:24"
+t3 <- "October 17, 1986 08:24"            # a character string
 t4 <- strptime(t3, "%B %d, %Y %H:%M")
-t4
-class(t4)        # "POSIXlt" "POSIXt"
+t4                                        # "1986-10-17 08:24:00 PDT"
+class(t4)                                 # "POSIXlt" "POSIXt"
 ```
 `strptime()` needs a **format string** because it can't guess:
 
@@ -910,19 +926,20 @@ class(t4)        # "POSIXlt" "POSIXt"
 
 ### Arithmetic
 ```r
-Sys.time() > t1                              # TRUE — comparisons just work
+Sys.time() > t1                              # TRUE — comparisons work
 Sys.time() - t1                              # a difftime object
-difftime(Sys.time(), t1, units = "days")     # choose your own units
+difftime(Sys.time(), t1, units = "days")     # Function to choose your own units for time difference. Prints:  Time difference of 0.01098802 days
 ```
 Units available: `"secs"`, `"mins"`, `"hours"`, `"days"`, `"weeks"`.
 
-The lesson closes by recommending the **`lubridate`** package (`ymd()`, `mdy()`, `hms()`, `year()`, `month()`) for anything nontrivial.
+The lesson closes by recommending the **`lubridate`** package (`ymd()`, `mdy()`, `hms()`, `year()`, `month()`) by Hadley Wickham for anything nontrivial.
 
 ---
 
 ## 15. Base Graphics
 
 Base graphics = quick exploratory plots. Verbose for publication work, but instant.
+lattice, ggplot2 and ggvis are not covered. 
 
 ```r
 data(cars)      # load the built-in dataset
@@ -934,14 +951,20 @@ head(cars)      # two columns: speed, dist
 `plot()` is generic: it dispatches on the class of its argument.
 ```r
 plot(cars)                              # with a 2-column data frame it plots col1 vs col2
-plot(x = cars$speed, y = cars$dist)     # identical, but explicit
+plot(x = cars$speed, y = cars$dist)     # identical, but explicit, except arguments ($ signs included) become the axes for the graph
 plot(x = cars$dist, y = cars$speed)     # axes swapped
 ```
 `plot(x, y)` puts `x` on the horizontal axis. Convention: **x = predictor, y = outcome.**
 
+- First, R notes that the data frame you have given it has just two columns, so it assumes that you want to plot one column versus the other.
+- Second, since we do not provide labels for either axis, R uses the names of the columns. 
+- Third, it creates axis tick marks at nice round numbers and labels them accordingly. 
+- Fourth, it uses the other defaults supplied in plot().
+
+
 ### Common arguments
 ```r
-plot(x = cars$speed, y = cars$dist, xlab = "Speed", ylab = "Stopping Distance")
+plot(x = cars$speed, y = cars$dist, xlab = "Speed", ylab = "Stopping Distance") # labels for axes 
 plot(cars, main = "My Plot")            # main title (top)
 plot(cars, sub = "My Plot Subtitle")    # subtitle (bottom)
 plot(cars, col = 2)                     # colour: 2 = red (or use "red")
@@ -966,16 +989,19 @@ plot(cars, pch = 2)                     # plotting character: 2 = open triangles
 
 ### Other plot types
 ```r
-data(mtcars)
-boxplot(formula = mpg ~ cyl, data = mtcars)   # mpg distribution BY cylinder count
-hist(mtcars$mpg)                              # histogram of a single variable
+data(mtcars)                                  # loads the data frame
+boxplot(formula = mpg ~ cyl, data = mtcars)   # mpg distribution BY cylinder count (mpg on y-axis)
+hist(mtcars$mpg)                              # histogram of a single variable. 
 ```
 
-**The formula syntax `y ~ x`** reads as "y as a function of x" (or "y by x"). It recurs everywhere in R — `lm()`, `t.test()`, `aov()`, `aggregate()` — so it's worth recognizing now.
+**The formula syntax `y ~ x`** reads as "y as a function of x" (or "y by x"). It reappears everywhere in R — `lm()`, `t.test()`, `aov()`, `aggregate()` — so it's worth recognizing now.
 
 Also in base: `barplot()`, `points()`, `lines()`, `abline()`, `text()`, `legend()`, `pairs()`.
+Histograms `hist()` and `plot()` both work best with single vectors. 
 
 The lesson ends by pointing to **`ggplot2`** (and `lattice`) for serious graphics.
+
+If you want to explore other elements of base graphics, then this web page (http://www.ling.upenn.edu/~joseff/rstudy/week4.html) provides a useful overview.
 
 ---
 
