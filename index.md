@@ -12,6 +12,33 @@ install_course("R Programming")
 swirl()          # bye() to exit, skip() to skip a question, play()/nxt() to experiment
 ```
 
+
+
+---
+
+## Handy Shortcuts Every RStudio User Should Know
+```r
+? (a question mark) before a function or command pulls up a help file
+
+CTRL + Enter runs the selected code 
+
+Ctrl + Alt + R runs entire script 
+
+Ctrl + Alt + B runs from start to current line
+
+Comment or uncomment lines: Ctrl + Shift + C
+
+Move line up or down: Alt + Up/Down (Windows/Linux/Mac) 
+
+Show function documentation: F1 (when cursor is on a function name)
+
+Switch to Source Editor: Ctrl + 1
+
+Switch to Console: Ctrl + 2
+
+Find in files: Ctrl + Shift + F (Windows/Linux) or Cmd + Shift + F (Mac)
+```
+
 ---
 
 ## 1. Basic Building Blocks
@@ -278,6 +305,7 @@ Everything happens through `[ ]`. There are exactly **four** kinds of index vect
 x[1:10]                  # elements 1 to 10 in the vector 
 x[is.na(x)]              # all the NAs (useless, but instructive)
 y <- x[!is.na(x)]        # drop the NAs — the standard cleanup idiom
+x[x$fruit type == "durian",]   # trickier: the rows in dataset x which fruit type is durian   
 y[y > 0]                 # positive values, NA-free
 x[x > 0]                 # WRONG: keeps NAs, because NA > 0, meaning NAs are included
 x[!is.na(x) & x > 0]     # RIGHT: positive values, in one step
